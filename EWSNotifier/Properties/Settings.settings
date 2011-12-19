@@ -2,14 +2,38 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="EWSNotifier.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="DefaultIconFilename" Type="System.String" Scope="User">
-      <Value Profile="(Default)">defaultIcon.ico</Value>
+    <Setting Name="DisconnectedIconFilename" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">disconnectedIcon.ico</Value>
     </Setting>
-    <Setting Name="NewMailIconFilename" Type="System.String" Scope="User">
+    <Setting Name="NewMailIconFilename" Type="System.String" Scope="Application">
       <Value Profile="(Default)">newMailIcon.ico</Value>
     </Setting>
-    <Setting Name="DefaultTooltipText" Type="System.String" Scope="User">
+    <Setting Name="DefaultTooltipText" Type="System.String" Scope="Application">
       <Value Profile="(Default)">EWS Notifier!</Value>
+    </Setting>
+    <Setting Name="EWSUsername" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="EWSPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="EWSURL" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="EWSURLPattern" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://{0}/ews/exchange.asmx</Value>
+    </Setting>
+    <Setting Name="EWSServer" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="EWSDomain" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ConnectedIconFilename" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">connectedIcon.ico</Value>
+    </Setting>
+    <Setting Name="FoldersToWatch" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

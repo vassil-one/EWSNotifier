@@ -28,8 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FolderView));
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.folderLoadBgWorker = new System.ComponentModel.BackgroundWorker();
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.SuspendLayout();
             // 
             // treeView1
@@ -38,11 +41,13 @@
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.treeView1.CheckBoxes = true;
-            this.treeView1.FullRowSelect = true;
             this.treeView1.HotTracking = true;
+            this.treeView1.ImageIndex = 0;
+            this.treeView1.ImageList = this.imageList1;
             this.treeView1.Location = new System.Drawing.Point(3, 2);
             this.treeView1.Margin = new System.Windows.Forms.Padding(2);
             this.treeView1.Name = "treeView1";
+            this.treeView1.SelectedImageIndex = 0;
             this.treeView1.Size = new System.Drawing.Size(241, 456);
             this.treeView1.TabIndex = 1;
             // 
@@ -50,6 +55,14 @@
             // 
             this.folderLoadBgWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.folderLoadBgWorker_DoWork);
             this.folderLoadBgWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.folderLoadBgWorker_RunWorkerCompleted);
+            // 
+            // imageList1
+            // 
+            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList1.Images.SetKeyName(0, "folder.png");
+            this.imageList1.Images.SetKeyName(1, "folder_closed.png");
+            this.imageList1.Images.SetKeyName(2, "folder_open.png");
             // 
             // FolderView
             // 
@@ -66,6 +79,7 @@
 
         private System.Windows.Forms.TreeView treeView1;
         private System.ComponentModel.BackgroundWorker folderLoadBgWorker;
+        private System.Windows.Forms.ImageList imageList1;
 
     }
 }

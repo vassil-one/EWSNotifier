@@ -11,6 +11,7 @@ using EWSNotifier.Utility;
 using System.ComponentModel;
 using EWSNotifier.UI;
 using System.Drawing;
+using EWSNotifier.Logging;
 
 namespace EWSNotifier
 {
@@ -20,11 +21,51 @@ namespace EWSNotifier
         private NotifyIcon _notifyIcon;
         private SettingsForm _settingsForm;
         private BaseFolderType[] _folders;
-        private Timer _checkMailTimer;
+        private Timer _checkMailTimer, _retryTimer;
         private BackgroundWorker _checkMailBackgroundWorker;
 
         public Subscription Subscription { get; set; }
-        public bool HasNewMail { get; set; }
+
+        private bool _hasNewMail;
+        public bool HasNewMail 
+        {
+            get 
+            {
+                return _hasNewMail;
+            }
+            set
+            {
+                _hasNewMail = value;
+                if(_hasNewMail)
+                    _notifyIcon.Icon = new System.Drawing.Icon(Settings.Default.NewMailIconFilename); 
+                else if(IsConnected)
+                    _notifyIcon.Icon = new System.Drawing.Icon(Settings.Default.ConnectedIconFilename); 
+                else
+                    _notifyIcon.Icon = new System.Drawing.Icon(Settings.Default.DisconnectedIconFilename); 
+            }
+        }
+
+        private bool _isConnected;
+        public bool IsConnected
+        {
+            get { return _isConnected; }
+            set
+            {
+                if (value == true)
+                {
+                    _notifyIcon.Icon = new Icon(Settings.Default.ConnectedIconFilename);
+                    ShowBalloonNotification("EWS Notifier", "Connected to Exchange Server");
+                }
+                else
+                {
+                    _notifyIcon.Icon = new Icon(Settings.Default.DisconnectedIconFilename);
+                    if(_isConnected == true)
+                        ShowBalloonNotification("EWS Notifier", "Exchange Connection Dropped");
+                }
+                _isConnected = value;
+
+            }
+        }
 
         public NotificationManager(NotifyIcon notifyIcon)
         {
@@ -34,15 +75,20 @@ namespace EWSNotifier
             _notifyIcon.ContextMenuStrip.Items.Add(new ToolStripButton("&Exit", null, exitItem_Click));
             _notifyIcon.Click += notifyIcon_Click;
             _notifyIcon.DoubleClick += settingsItem_Click;
-            _notifyIcon.Icon = new Icon(Settings.Default.DefaultIconFilename);
             _notifyIcon.Text = Settings.Default.DefaultTooltipText;
             _notifyIcon.BalloonTipTitle = "New Mail";
             _notifyIcon.BalloonTipText = "New Mail Found";
             _notifyIcon.Visible = true;
 
+            this.IsConnected = false;
+
             _checkMailTimer = new Timer();
             _checkMailTimer.Interval = 5000;
             _checkMailTimer.Tick += checkMailTimer_Tick;
+
+            _retryTimer = new Timer();
+            _retryTimer.Interval = 10000;
+            _retryTimer.Tick += retryTimer_Tick;
 
             _checkMailBackgroundWorker = new BackgroundWorker();
             _checkMailBackgroundWorker.DoWork += new DoWorkEventHandler(checkMailBackgroundWorker_DoWork);
@@ -69,32 +115,55 @@ namespace EWSNotifier
                 _settingsForm.Activate();
         }
 
+        public void ShowBalloonNotification(string title, string text)
+        {
+            _notifyIcon.BalloonTipTitle = title;
+            _notifyIcon.BalloonTipText = text;
+            _notifyIcon.ShowBalloonTip(30000);
+        }
         #region "Checking Mail"
 
-        public void SetupSubscription(BaseFolderType[] folders)
+        public bool SetupSubscription(BaseFolderType[] folders)
         {
+            _folders = folders;
             OnLoadingBegin(new LoadingEventArgs());
 
-            CloseSubscription();
-            _folders = folders;
+            bool success = false;
+            try
+            {
+                CloseSubscription();
+                SubscribeResponseMessageType response = this.EWSManager.Subscribe(folders);
+                this.IsConnected = (response.ResponseClass == ResponseClassType.Success);
 
-            SubscribeResponseMessageType response = this.EWSManager.Subscribe(folders);
-            Subscription sub = new Subscription();
-            sub.SubscriptionId = response.SubscriptionId;
-            sub.Watermark = response.Watermark;
-            this.Subscription = sub;
+                Subscription sub = new Subscription();
+                sub.SubscriptionId = response.SubscriptionId;
+                sub.Watermark = response.Watermark;
+                this.Subscription = sub;
+                _checkMailTimer.Start();
+                Logger.Log(String.Format("Timer started. Checking for mail every {0} seconds",
+                             _checkMailTimer.Interval / 1000));
+                success = true;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("Failed to setup folder subscription. Message: " + ex.Message);
+                Logger.Log(String.Format("Retrying in {0} seconds", _retryTimer.Interval / 1000));
+                this.IsConnected = false;
+                _retryTimer.Start();
+            }
 
-            _checkMailTimer.Start();
-            Logger.Log(String.Format("Timer started. Checking for mail every {0} seconds",
-                                      _checkMailTimer.Interval / 1000));
-
-            OnLoadingEnd(new LoadingEventArgs() { LoadSuccessful = true });
+            OnLoadingEnd(new LoadingEventArgs() { LoadSuccessful = success });
+            return success;
         }
 
         private void CloseSubscription()
         {
-            if (this.Subscription != null)
-                this.EWSManager.Unsubscribe(this.Subscription);
+            try
+            {
+                if (this.Subscription != null)
+                    this.EWSManager.Unsubscribe(this.Subscription);
+            }
+            catch { }
         }
 
         private void checkMailTimer_Tick(object sender, EventArgs e)
@@ -135,10 +204,13 @@ namespace EWSNotifier
             if (e.Error != null)
             {
                 Logger.Log("Check for mail failed. Message: " + e.Error.Message);
-                _notifyIcon.BalloonTipText = "Check for mail failed!";
-                _notifyIcon.ShowBalloonTip(30000);
+                if (IsConnected)
+                    ShowBalloonNotification("Check for mail failed", "Message: " + e.Error.Message);
+                _retryTimer.Start();
+                return;
             }
-            else if(e.Result != null)
+
+            if(e.Result != null)
             {
                 List<MessageType> messages = (List<MessageType>)e.Result;
                 HandleNewMail(messages);
@@ -161,9 +233,15 @@ namespace EWSNotifier
                 Logger.Log("New mail from " + from + " in folder " + folderName);
                 balloonTipMsg += " * From " + from + " in folder " + folderName + Environment.NewLine;
             }
-            _notifyIcon.BalloonTipText = balloonTipMsg;
-            _notifyIcon.ShowBalloonTip(30000);
+            ShowBalloonNotification("New Mail", balloonTipMsg);
         }
+
+        private void retryTimer_Tick(object sender, EventArgs e)
+        {
+            _retryTimer.Stop();
+            SetupSubscription(_folders);
+        }
+
 
         #endregion
 
@@ -172,7 +250,6 @@ namespace EWSNotifier
         private void notifyIcon_Click(object sender, EventArgs e)
         {
             HasNewMail = false;
-            _notifyIcon.Icon = new System.Drawing.Icon(Settings.Default.DefaultIconFilename);
         }
 
         protected void settingsItem_Click(object sender, EventArgs e)
@@ -185,14 +262,6 @@ namespace EWSNotifier
             Application.ExitThread();
         }
 
-        #endregion
-
-        #region "IDisposable"
-        public void Dispose()
-        {
-            _settingsForm.Close();
-            _notifyIcon.Visible = false; // should remove lingering tray icon!
-        }
         #endregion
 
         #region "ILoadingAware"
@@ -211,6 +280,14 @@ namespace EWSNotifier
                 LoadingEnd(this, e);
         }
 
+        #endregion
+
+        #region "IDisposable"
+        public void Dispose()
+        {
+            _settingsForm.Close();
+            //_notifyIcon.Visible = false; // should remove lingering tray icon!
+        }
         #endregion
 
     }

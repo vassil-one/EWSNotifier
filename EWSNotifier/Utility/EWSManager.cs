@@ -9,6 +9,9 @@ using EWSNotifier.Utility;
 
 namespace EWSNotifier
 {
+    /// <summary>
+    /// Utility class for calling Exchange Web Service Operations
+    /// </summary>
     public class EWSManager
     {
         private ExchangeServiceBinding EWSBinding { get; set; }
@@ -57,10 +60,6 @@ namespace EWSNotifier
 
             // Cast to the correct response message type.
             FindFolderResponseMessageType ffrmt = (FindFolderResponseMessageType)rmt;
-            if (ffrmt.ResponseClass != ResponseClassType.Success)
-            {
-                throw new Exception(ffrmt.MessageText);
-            }
 
             // add each folder found to the current tree node, and recursively search each one
             var foldersFound = (from f in ffrmt.RootFolder.Folders where f.GetType() == typeof(FolderType) select f);
@@ -76,26 +75,9 @@ namespace EWSNotifier
             return currentNode;
         }
 
-        public List<MessageType> GetMessages(BaseItemIdType[] itemIds)
-        {
-            List<MessageType> messages = new List<MessageType>();
-
-            GetItemType get = new GetItemType();
-            get.ItemShape = new ItemResponseShapeType() { BaseShape = DefaultShapeNamesType.AllProperties };
-            get.ItemIds = itemIds;
-            GetItemResponseType response = EWSBinding.GetItem(get);
-            foreach (ItemInfoResponseMessageType iirmt in response.ResponseMessages.Items)
-            {
-                MessageType message = (MessageType)iirmt.Items.Items[0];                
-                messages.Add(message);    
-            }
-            return messages;
-        }
-
         /// <summary>
         /// Subscribe to notifications for the given array of folders.
         /// </summary>
-        /// <param name="foldersToWatch"></param>
         /// <returns>SubscribeResponseMessageType which has the SubscriptionID and Watermark needed to GetEvents</returns>
         public SubscribeResponseMessageType Subscribe(BaseFolderType[] foldersToWatch)
         {
@@ -109,10 +91,6 @@ namespace EWSNotifier
 
             SubscribeResponseType response = EWSBinding.Subscribe(subscribe);
             SubscribeResponseMessageType rmt = (SubscribeResponseMessageType)response.ResponseMessages.Items[0];
-            if (rmt.ResponseClass != ResponseClassType.Success)
-            {
-                throw new Exception(rmt.MessageText);
-            }
 
             return rmt;
         }
@@ -137,11 +115,29 @@ namespace EWSNotifier
             get.Watermark = subscription.Watermark;
             GetEventsResponseType response = EWSBinding.GetEvents(get);
             GetEventsResponseMessageType rmt = (GetEventsResponseMessageType)response.ResponseMessages.Items[0];
-            if (rmt.ResponseClass != ResponseClassType.Success)
-            {
-                throw new Exception(rmt.MessageText);
-            }                        
             return rmt;
         }
+
+        /// <summary>
+        /// Call the Getitem EWS oepration for the given array of message item ids
+        /// </summary>
+        /// <returns>List of Messages</returns>
+        public List<MessageType> GetMessages(BaseItemIdType[] itemIds)
+        {
+            List<MessageType> messages = new List<MessageType>();
+
+            GetItemType get = new GetItemType();
+            get.ItemShape = new ItemResponseShapeType() { BaseShape = DefaultShapeNamesType.AllProperties };
+            get.ItemIds = itemIds;
+            GetItemResponseType response = EWSBinding.GetItem(get);
+            foreach (ItemInfoResponseMessageType iirmt in response.ResponseMessages.Items)
+            {
+                MessageType message = (MessageType)iirmt.Items.Items[0];
+                messages.Add(message);
+            }
+            return messages;
+        }
+
+
     }
 }

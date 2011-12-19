@@ -6,6 +6,7 @@ using System.Drawing;
 using EWSNotifier.Properties;
 using System.Threading;
 using EWSNotifier.Utility;
+using EWSNotifier.Logging;
 
 namespace EWSNotifier
 {

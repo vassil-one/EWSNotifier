@@ -23,39 +23,120 @@ namespace EWSNotifier.Properties {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("defaultIcon.ico")]
-        public string DefaultIconFilename {
+        [global::System.Configuration.DefaultSettingValueAttribute("disconnectedIcon.ico")]
+        public string DisconnectedIconFilename {
             get {
-                return ((string)(this["DefaultIconFilename"]));
-            }
-            set {
-                this["DefaultIconFilename"] = value;
+                return ((string)(this["DisconnectedIconFilename"]));
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("newMailIcon.ico")]
         public string NewMailIconFilename {
             get {
                 return ((string)(this["NewMailIconFilename"]));
             }
-            set {
-                this["NewMailIconFilename"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("EWS Notifier!")]
         public string DefaultTooltipText {
             get {
                 return ((string)(this["DefaultTooltipText"]));
             }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string EWSUsername {
+            get {
+                return ((string)(this["EWSUsername"]));
+            }
             set {
-                this["DefaultTooltipText"] = value;
+                this["EWSUsername"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string EWSPassword {
+            get {
+                return ((string)(this["EWSPassword"]));
+            }
+            set {
+                this["EWSPassword"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string EWSURL {
+            get {
+                return ((string)(this["EWSURL"]));
+            }
+            set {
+                this["EWSURL"] = value;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://{0}/ews/exchange.asmx")]
+        public string EWSURLPattern {
+            get {
+                return ((string)(this["EWSURLPattern"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string EWSServer {
+            get {
+                return ((string)(this["EWSServer"]));
+            }
+            set {
+                this["EWSServer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string EWSDomain {
+            get {
+                return ((string)(this["EWSDomain"]));
+            }
+            set {
+                this["EWSDomain"] = value;
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("connectedIcon.ico")]
+        public string ConnectedIconFilename {
+            get {
+                return ((string)(this["ConnectedIconFilename"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string FoldersToWatch {
+            get {
+                return ((string)(this["FoldersToWatch"]));
+            }
+            set {
+                this["FoldersToWatch"] = value;
             }
         }
     }

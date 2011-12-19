@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using EWSNotifier.Utility;
 using EWSNotifier.ewswebreference;
 using EWSNotifier.Model;
+using EWSNotifier.Logging;
 
 namespace EWSNotifier.UI
 {
@@ -20,6 +21,8 @@ namespace EWSNotifier.UI
             {
                 List<BaseFolderType> folderIds = new List<BaseFolderType>();
                 GetCheckedNodes(null, folderIds);
+                Configuration.FoldersToWatch = (from fid in folderIds select fid.FolderId.Id).ToList();
+                Configuration.SaveSettings();
                 return folderIds;
             }
         }
@@ -55,13 +58,18 @@ namespace EWSNotifier.UI
             {
                 success = true;
                 NTree<FolderType> folderTree = (NTree<FolderType>)e.Result;
-                TreeNode uiNode = AddFolderToTreeView(folderTree, null);
-                foreach (TreeNode childNode in uiNode.Nodes)
+                FolderTreeNode uiNode = AddFolderToTreeView(folderTree, null);
+                foreach (FolderTreeNode childNode in uiNode.Nodes)
+                {
                     treeView1.Nodes.Add(childNode);
+                    if (EWSNotifier.Utility.Configuration.FoldersToWatch.Contains(childNode.Folder.FolderId.Id))
+                        childNode.Checked = true;
+                }
+                treeView1.ExpandAll();
                 Logger.Log("Folders loaded");
             }
 
-            OnLoadingEnd(new LoadingEventArgs() { LoadSuccessful = success});            
+            OnLoadingEnd(new LoadingEventArgs() { LoadSuccessful = success });            
         }
 
         private FolderTreeNode AddFolderToTreeView(NTree<FolderType> folderTree, FolderTreeNode uiNode)
@@ -77,6 +85,9 @@ namespace EWSNotifier.UI
             while ((childNode = folderTree.getChild(i)) != null)
             {
                 FolderTreeNode nextUINode = new FolderTreeNode(childNode.Data);
+                if (EWSNotifier.Utility.Configuration.FoldersToWatch.Contains(nextUINode.Folder.FolderId.Id))
+                    nextUINode.Checked = true;
+
                 AddFolderToTreeView(childNode, nextUINode);
                 uiNode.Nodes.Add(nextUINode);
                 i++;
