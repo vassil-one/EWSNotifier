@@ -39,6 +39,7 @@ namespace EWSNotifier
             try
             {
                 result = ShowThreadExceptionDialog("Windows Forms Error", t.Exception);
+                Logger.Log(t.Exception.Message);
             }
             catch
             {
@@ -46,6 +47,7 @@ namespace EWSNotifier
                 {
                     MessageBox.Show("Fatal Windows Forms Error",
                         "Fatal Windows Forms Error", MessageBoxButtons.AbortRetryIgnore, MessageBoxIcon.Stop);
+                    Logger.Log(t.Exception.Message);
                 }
                 finally
                 {

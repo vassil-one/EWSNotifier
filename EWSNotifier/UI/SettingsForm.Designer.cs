@@ -33,6 +33,7 @@
             this.lblConnectionStatus = new System.Windows.Forms.Label();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.logBox = new EWSNotifier.UI.LogBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.label4 = new System.Windows.Forms.Label();
             this.lnkEditURL = new System.Windows.Forms.LinkLabel();
@@ -47,9 +48,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.txtEWSUrl = new System.Windows.Forms.TextBox();
             this.btnWatchFolders = new System.Windows.Forms.Button();
-            this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
-            this.logBox = new EWSNotifier.UI.LogBox();
             this.folderView = new EWSNotifier.UI.FolderView();
+            this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -69,6 +69,7 @@
             this.lblConnectionStatus.TabIndex = 12;
             this.lblConnectionStatus.Text = "Not Connected";
             this.lblConnectionStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblConnectionStatus.Visible = false;
             // 
             // splitContainer1
             // 
@@ -97,6 +98,16 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(588, 709);
             this.panel1.TabIndex = 0;
+            // 
+            // logBox
+            // 
+            this.logBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.logBox.Location = new System.Drawing.Point(3, 143);
+            this.logBox.Name = "logBox";
+            this.logBox.Size = new System.Drawing.Size(582, 563);
+            this.logBox.TabIndex = 24;
             // 
             // panel2
             // 
@@ -234,21 +245,6 @@
             this.btnWatchFolders.UseVisualStyleBackColor = true;
             this.btnWatchFolders.Click += new System.EventHandler(this.btnWatchFolders_Click);
             // 
-            // errorProvider1
-            // 
-            this.errorProvider1.ContainerControl = this;
-            this.errorProvider1.Icon = ((System.Drawing.Icon)(resources.GetObject("errorProvider1.Icon")));
-            // 
-            // logBox
-            // 
-            this.logBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.logBox.Location = new System.Drawing.Point(3, 143);
-            this.logBox.Name = "logBox";
-            this.logBox.Size = new System.Drawing.Size(582, 563);
-            this.logBox.TabIndex = 24;
-            // 
             // folderView
             // 
             this.folderView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -260,6 +256,11 @@
             this.folderView.TabIndex = 0;
             this.folderView.LoadingBegin += new EWSNotifier.UI.LoadingEventHandler(this.folderView_LoadingBegin);
             this.folderView.LoadingEnd += new EWSNotifier.UI.LoadingEventHandler(this.folderView_LoadingEnd);
+            // 
+            // errorProvider1
+            // 
+            this.errorProvider1.ContainerControl = this;
+            this.errorProvider1.Icon = ((System.Drawing.Icon)(resources.GetObject("errorProvider1.Icon")));
             // 
             // SettingsForm
             // 

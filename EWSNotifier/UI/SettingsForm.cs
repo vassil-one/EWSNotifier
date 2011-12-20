@@ -23,6 +23,7 @@ namespace EWSNotifier
         {
             InitializeComponent();
             this.NotificationManager = notificationManager;
+            this.btnWatchFolders.Enabled = false;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -36,6 +37,16 @@ namespace EWSNotifier
 
             Logger.RegisterLogger(this.logBox);
             Logger.Log("Settings Form Loaded");
+
+            AttemptAutoConnect();
+        }
+
+        private void AttemptAutoConnect()
+        {
+            if (!ValidateControls(showValidationErrors : false))
+                return;
+
+            LoadFolders();
         }
 
         /// <summary>
@@ -53,12 +64,25 @@ namespace EWSNotifier
 
         private void btnConnect_Click(object sender, EventArgs e)
         {
+            if (!ValidateControls(showValidationErrors : true))
+                return;
+
+            LoadFolders();
+        }
+
+        private bool ValidateControls(bool showValidationErrors)
+        {
+            bool success = true; 
+
             string username = txtUsername.Text;
             if (string.IsNullOrWhiteSpace(username))
             {
-                errorProvider1.SetError(txtUsername, "Required");
-                txtUsername.Focus();
-                return;
+                if (showValidationErrors)
+                {
+                    errorProvider1.SetError(txtUsername, "Required");
+                    txtUsername.Focus();
+                }
+                success = false;
             }
             else
                 errorProvider1.SetError(txtUsername, string.Empty);
@@ -66,9 +90,12 @@ namespace EWSNotifier
             string password = txtPassword.Text;
             if (string.IsNullOrWhiteSpace(password))
             {
-                errorProvider1.SetError(txtPassword, "Required");
-                txtPassword.Focus();
-                return;
+                if (showValidationErrors)
+                {
+                    errorProvider1.SetError(txtPassword, "Required");
+                    txtPassword.Focus();
+                }
+                success = false;
             }
             else
                 errorProvider1.SetError(txtPassword, string.Empty);
@@ -76,9 +103,12 @@ namespace EWSNotifier
             string domain = txtDomain.Text;
             if (string.IsNullOrWhiteSpace(domain))
             {
-                errorProvider1.SetError(txtDomain, "Required");
-                txtDomain.Focus();
-                return;
+                if (showValidationErrors)
+                {
+                    errorProvider1.SetError(txtDomain, "Required");
+                    txtDomain.Focus();
+                }
+                success = false;
             }
             else
                 errorProvider1.SetError(txtDomain, string.Empty);
@@ -86,13 +116,25 @@ namespace EWSNotifier
             string ewsUrl = txtEWSUrl.Text;
             if (string.IsNullOrWhiteSpace(ewsUrl))
             {
-                errorProvider1.SetError(txtEWSUrl, "Required. Either enter a value in the Server field or edit the URL directly by clicking Edit.");
-                txtServer.Focus();
-                return;
+                if (showValidationErrors)
+                {
+                    errorProvider1.SetError(txtEWSUrl, "Required. Either enter a value in the Server field or edit the URL directly by clicking Edit.");
+                    txtServer.Focus();
+                }
+                success = false;
             }
             else
                 errorProvider1.SetError(txtEWSUrl, string.Empty);
 
+            return success;
+        }
+
+        private void LoadFolders()
+        {
+            string username = txtUsername.Text;
+            string password = txtPassword.Text;
+            string domain = txtDomain.Text;
+            string ewsUrl = txtEWSUrl.Text;
             btnConnect.Enabled = false;
             this.EWSManager = new EWSManager(username, password, domain, ewsUrl);
             folderView.LoadFolders(this.EWSManager);
@@ -111,7 +153,9 @@ namespace EWSNotifier
             if (e.LoadSuccessful)
             {
                 lblConnectionStatus.Text = "Folders Successfully Loaded";
+                btnWatchFolders.Enabled = true;
                 SaveSettings();
+                btnWatchFolders.PerformClick();
             }
             else
             {
@@ -123,6 +167,9 @@ namespace EWSNotifier
         private void btnWatchFolders_Click(object sender, EventArgs e)
         {
             BaseFolderType[] folders = folderView.CheckedFolders.ToArray();
+            if (folders.Length <= 0)
+                return;
+
             this.NotificationManager.EWSManager = this.EWSManager;
             NotificationManager.SetupSubscription(folders);
         }

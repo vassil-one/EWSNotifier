@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Linq;
 using System.Text;
 using EWSNotifier.Properties;
@@ -21,8 +22,22 @@ namespace EWSNotifier.Utility
 
         public static string EWSPassword
         {
-            get { return Settings.Default.EWSPassword; }
-            set { Settings.Default.EWSPassword = value; }
+            get
+            { 
+                byte[] enc = Convert.FromBase64String(Settings.Default.EWSPassword);
+                if (enc.Length == 0)
+                    return string.Empty;
+                byte[] entropy = UnicodeEncoding.UTF8.GetBytes("whatever");
+                byte[] dec = ProtectedData.Unprotect(enc, entropy, DataProtectionScope.CurrentUser);
+                return UnicodeEncoding.UTF8.GetString(dec);        
+            }
+            set 
+            { 
+                byte[] dec = UnicodeEncoding.UTF8.GetBytes(value);
+                byte[] entropy = UnicodeEncoding.UTF8.GetBytes("whatever");
+                byte[] enc = ProtectedData.Protect(dec, entropy, DataProtectionScope.CurrentUser);
+                Settings.Default.EWSPassword = Convert.ToBase64String(enc);
+            }
         }
 
         public static string EWSDomain
